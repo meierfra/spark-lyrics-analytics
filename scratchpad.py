@@ -7,10 +7,9 @@ with open(stopfile) as f:
     for line in f:
         line = line.strip()
         if (len(line) > 0):
-            print(line)
             stopword_list.append(line)
     stopwords = set(stopword_list)
-print(stopwords)
+# print(stopwords)
 
 
 def remove_word_binder(text):
@@ -29,7 +28,21 @@ def remove_stop_words(words):
     return filter(lambda word: word not in stopwords, words)
 
 
-words = tokenize("hello world how up are you")
-print(words)
-words2 = remove_stop_words(words)
-print(words2)
+def sort_word_count_list(word_count_list):
+    return sorted(word_count_list, key=lambda x: x[1], reverse=True)
+
+
+def count_unique_words(words):
+    d = {}
+    for word in words:
+        n = d.get(word) or 0
+        d[word] = n + 1
+    return d.items()
+
+
+# words = tokenize("hello world how up are you")
+# print(words)
+# words2 = remove_stop_words(words)
+# print(words2)
+
+print(sort_word_count_list(count_unique_words(tokenize("hello world hello world world"))))
