@@ -1,11 +1,21 @@
-import pyspark
+import datetime
 import re
+
+import pyspark
 from pyspark.sql import SQLContext
+
+
+# https://spark.apache.org/docs/2.2.0/api/python/pyspark.html#pyspark.RDD
+# https://spark.apache.org/docs/2.2.0/api/python/pyspark.sql.html#pyspark.sql.DataFrame
+PATH = "."
+STOPWORD_FILE = PATH + "/" + "stopwords.txt"
+LYRICS_CSV = PATH + "/" + "Lyrics.small.csv"
+# LYRICS_CSV = PATH + "/" + "Lyrics1.csv"
+SONGS_LIMIT = 10000
 
 sc = pyspark.SparkContext(appName="READ_DATA_TEST")
 
-stopfile = "./stopwords.txt"
-stopwords = set(sc.textFile(stopfile).collect())
+stopwords = set(sc.textFile(STOPWORD_FILE).collect())
 # print(stopwords)
 
 
@@ -25,6 +35,14 @@ def remove_stop_words(words):
     return filter(lambda word: word not in stopwords, words)
 
 
+def combine_word_count_dicts(wcd1, wcd2):
+    wcd = wcd1.copy()
+    for (k, v2) in wcd2.items():
+        v1 = wcd.get(k) or 0
+        wcd[k] = v1 + v2
+    return wcd
+
+
 def combine_word_count_lists(wc1, wc2):
     d1 = dict(wc1)
     d2 = dict(wc2)
@@ -38,22 +56,31 @@ def sort_word_count_list(word_count_list):
     return sorted(word_count_list, key=lambda x: x[1], reverse=True)
 
 
-def count_unique_words(words):
+def sort_word_count_dict_to_list(word_count_dict):
+    return sorted(word_count_dict.items(), key=lambda x: x[1], reverse=True)
+
+
+def count_unique_words_to_dict(words):
     d = {}
     for word in words:
         n = d.get(word) or 0
         d[word] = n + 1
-    return d.items()
+    return d
+
+
+def count_unique_words_to_list(words):
+    return count_unique_words_to_dict(words).items()
 
 
 def preproc_text(text):
     text = remove_word_binder(text)
     tokens = tokenize(text)
     tokens = remove_stop_words(tokens)
-    word_counts = count_unique_words(tokens)
-    word_counts = sort_word_count_list(word_counts)
-    return word_counts
+    word_count_dict = count_unique_words_to_dict(tokens)
+    return word_count_dict
 
+
+t0 = datetime.datetime.now()
 
 sqlContext = SQLContext(sc)
 lyrics_df = sqlContext.read.format("com.databricks.spark.csv")\
@@ -61,7 +88,10 @@ lyrics_df = sqlContext.read.format("com.databricks.spark.csv")\
     .option("multiLine", "true")\
     .option("escape", '"')\
     .option("inferSchema", "true")\
-    .load("Lyrics.small.csv")
+    .load(LYRICS_CSV)
+print("loaded {} lyrics into data frame".format(lyrics_df.count()))
+t_loaded = datetime.datetime.now()
+print("loadtime:", str(t_loaded - t0))
 
 # lyrics_df.registerTempTable("lyrics")
 # sqlContext.sql("select Band from lyrics").show()
@@ -72,22 +102,33 @@ lyrics_df = sqlContext.read.format("com.databricks.spark.csv")\
 # lyrics_df.show()
 
 
-lyrics_rdd = lyrics_df.rdd
+lyrics_rdd = lyrics_df.limit(SONGS_LIMIT).rdd.repartition(4)
+# lyrics_rdd = lyrics_df.rdd.repartition(4)
 song_words_rdd = lyrics_rdd.map(lambda x: (x[0], x[2], preproc_text(x[1])))
-# print(song_words_rdd.take(10))
+# print("song_words_rdd partitions", song_words_rdd.getNumPartitions())
+print(song_words_rdd.count(), song_words_rdd.take(10))
+t_preproc = datetime.datetime.now()
+print("preprocesstime:", str(t_preproc - t_loaded))
+
 
 print("----List most common words by song-------------")
-for song in song_words_rdd.collect():
+for song in song_words_rdd.map(lambda x: (x[0], x[1], sort_word_count_dict_to_list(x[2]))).take(20):
     print(song[0] + " | " + song[1] + " | " + str(len(song[2])) + " | " + str(song[2][0:3]))
 print("")
 
+
 print("----List most common words by artist-------------")
-artist_words_rdd = song_words_rdd.map(lambda x: (x[0], x[2])).reduceByKey(lambda wc1, wc2: sort_word_count_list(combine_word_count_lists(wc1, wc2)))
-for artist in artist_words_rdd.collect():
+artist_words_rdd = song_words_rdd.map(lambda x: (x[0], x[2])).reduceByKey(lambda wcd1, wcd2: combine_word_count_dicts(wcd1, wcd2))
+# print("artist_words_rdd partitions", artist_words_rdd.getNumPartitions())
+for artist in artist_words_rdd.map(lambda x: (x[0], sort_word_count_dict_to_list(x[1]))).take(10):
     print(artist[0] + " | " + str(artist[1][0:3]))
 print("")
 
+
 print("----List most common words in all songs-------------")
-words_rdd = artist_words_rdd.map(lambda x: x[1]).reduce(lambda wc1, wc2: sort_word_count_list(combine_word_count_lists(wc1, wc2)))
-print(words_rdd[0:3])
+words_count_dict = song_words_rdd.map(lambda x: x[2]).reduce(lambda wcd1, wcd2: combine_word_count_dicts(wcd1, wcd2))
+print(sort_word_count_dict_to_list(words_count_dict)[0:6])
 print("")
+
+t_end = datetime.datetime.now()
+print("runtime:", str(t_end - t_preproc))
