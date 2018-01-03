@@ -1,0 +1,9 @@
+-----------------
+- on Amazon EMR cluster I had to set the env variable PYTHONIOENCODING to utf8
+before using spark-submit.
+
+export PYTHONIOENCODING=utf8
+
+
+----------------
+-

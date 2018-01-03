@@ -12,6 +12,7 @@ STOPWORD_FILE = PATH + "/" + "stopwords.txt"
 LYRICS_CSV = PATH + "/" + "Lyrics.small.csv"
 # LYRICS_CSV = PATH + "/" + "Lyrics1.csv"
 SONGS_LIMIT = 10000
+PARTITIONS = 20
 
 sc = pyspark.SparkContext(appName="READ_DATA_TEST")
 
@@ -57,7 +58,7 @@ def sort_word_count_list(word_count_list):
 
 
 def sort_word_count_dict_to_list(word_count_dict):
-    #items gives a list in form [ (word1, count1), (word2, count2), ... ]
+    # items gives a list in form [ (word1, count1), (word2, count2), ... ]
     return sorted(word_count_dict.items(), key=lambda x: x[1], reverse=True)
 
 
@@ -103,27 +104,27 @@ print("loadtime:", str(t_loaded - t0))
 # lyrics_df.show()
 
 # Get SONGS_LIMIT Rows/Songs out of lyrics_df
-# repartition is needed for performance
-lyrics_rdd = lyrics_df.limit(SONGS_LIMIT).rdd.repartition(4)
+# repartition() is needed for performance
+lyrics_rdd = lyrics_df.limit(SONGS_LIMIT).rdd.repartition(PARTITIONS)
 # lyrics_rdd = lyrics_df.rdd.repartition(4)
 
 # reorder structture from |Artist|Lyrics|Songname| to |Interpret|Songname|processed Lyrics-words|
 song_words_rdd = lyrics_rdd.map(lambda x: (x[0], x[2], preproc_text(x[1])))
-# print("song_words_rdd partitions", song_words_rdd.getNumPartitions())
-print(song_words_rdd.count(), song_words_rdd.take(10))
+print("song_words_rdd with {} entries and {} partitions".format(song_words_rdd.count(), song_words_rdd.getNumPartitions()))
+print(song_words_rdd.take(10))
 t_preproc = datetime.datetime.now()
 print("preprocesstime:", str(t_preproc - t_loaded))
-
+print("")
 
 print("----List most common words by song-------------")
 for song in song_words_rdd.map(lambda x: (x[0], x[1], sort_word_count_dict_to_list(x[2]))).take(20):
-    #print Artist|SongName|Number of unique words in Song|3 most used words|
+    # print Artist|SongName|Number of unique words in Song|3 most used words|
     print(song[0] + " | " + song[1] + " | " + str(len(song[2])) + " | " + str(song[2][0:3]))
 print("")
 
 
 print("----List most common words by artist-------------")
-#create new rrd with structure |Interpret|word count dict| then reduce by key (Interpret), combining the word count dictionaries
+# create new rrd with structure |Interpret|word count dict| then reduce by key (Interpret), combining the word count dictionaries
 artist_words_rdd = song_words_rdd.map(lambda x: (x[0], x[2])).reduceByKey(lambda wcd1, wcd2: combine_word_count_dicts(wcd1, wcd2))
 # print("artist_words_rdd partitions", artist_words_rdd.getNumPartitions())
 for artist in artist_words_rdd.map(lambda x: (x[0], sort_word_count_dict_to_list(x[1]))).take(10):
