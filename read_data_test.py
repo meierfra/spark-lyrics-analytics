@@ -38,7 +38,7 @@ def remove_stop_words(words):
 def combine_word_count_dicts(wcd1, wcd2):
     wcd = wcd1.copy()
     for (k, v2) in wcd2.items():
-        v1 = wcd.get(k) or 0
+        v1 = wcd.get(k) or 0  # return 0 if word not in first word count dict
         wcd[k] = v1 + v2
     return wcd
 
@@ -57,13 +57,14 @@ def sort_word_count_list(word_count_list):
 
 
 def sort_word_count_dict_to_list(word_count_dict):
+    #items gives a list in form [ (word1, count1), (word2, count2), ... ]
     return sorted(word_count_dict.items(), key=lambda x: x[1], reverse=True)
 
 
 def count_unique_words_to_dict(words):
     d = {}
     for word in words:
-        n = d.get(word) or 0
+        n = d.get(word) or 0  # if d.get(word) is None use 0
         d[word] = n + 1
     return d
 
@@ -101,9 +102,12 @@ print("loadtime:", str(t_loaded - t0))
 # print(lyrics_df.count())
 # lyrics_df.show()
 
-
+# Get SONGS_LIMIT Rows/Songs out of lyrics_df
+# repartition is needed for performance
 lyrics_rdd = lyrics_df.limit(SONGS_LIMIT).rdd.repartition(4)
 # lyrics_rdd = lyrics_df.rdd.repartition(4)
+
+# reorder structture from |Artist|Lyrics|Songname| to |Interpret|Songname|processed Lyrics-words|
 song_words_rdd = lyrics_rdd.map(lambda x: (x[0], x[2], preproc_text(x[1])))
 # print("song_words_rdd partitions", song_words_rdd.getNumPartitions())
 print(song_words_rdd.count(), song_words_rdd.take(10))
@@ -113,11 +117,13 @@ print("preprocesstime:", str(t_preproc - t_loaded))
 
 print("----List most common words by song-------------")
 for song in song_words_rdd.map(lambda x: (x[0], x[1], sort_word_count_dict_to_list(x[2]))).take(20):
+    #print Artist|SongName|Number of unique words in Song|3 most used words|
     print(song[0] + " | " + song[1] + " | " + str(len(song[2])) + " | " + str(song[2][0:3]))
 print("")
 
 
 print("----List most common words by artist-------------")
+#create new rrd with structure |Interpret|word count dict| then reduce by key (Interpret), combining the word count dictionaries
 artist_words_rdd = song_words_rdd.map(lambda x: (x[0], x[2])).reduceByKey(lambda wcd1, wcd2: combine_word_count_dicts(wcd1, wcd2))
 # print("artist_words_rdd partitions", artist_words_rdd.getNumPartitions())
 for artist in artist_words_rdd.map(lambda x: (x[0], sort_word_count_dict_to_list(x[1]))).take(10):
