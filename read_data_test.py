@@ -4,14 +4,21 @@ import re
 import pyspark
 from pyspark.sql import SQLContext
 
-
+# pyspak API description
 # https://spark.apache.org/docs/2.2.0/api/python/pyspark.html#pyspark.RDD
 # https://spark.apache.org/docs/2.2.0/api/python/pyspark.sql.html#pyspark.sql.DataFrame
+
 PATH = "."
 STOPWORD_FILE = PATH + "/" + "stopwords.txt"
+
+# Lyrics dataset from kaggle
+# https://www.kaggle.com/artimous/every-song-you-have-heard-almost
 LYRICS_CSV = PATH + "/" + "Lyrics.small.csv"
 # LYRICS_CSV = PATH + "/" + "Lyrics1.csv"
+# LYRICS_CSV = PATH + "/" + "Lyrics2.csv"
+# LYRICS_CSV = PATH + "/" + "Lyrics_all.csv"
 SONGS_LIMIT = 10000
+# SONGS_LIMIT = 10000000
 PARTITIONS = 20
 
 sc = pyspark.SparkContext(appName="READ_DATA_TEST")
@@ -105,37 +112,62 @@ print("loadtime:", str(t_loaded - t0))
 
 # Get SONGS_LIMIT Rows/Songs out of lyrics_df
 # repartition() is needed for performance
-lyrics_rdd = lyrics_df.limit(SONGS_LIMIT).rdd.repartition(PARTITIONS)
-# lyrics_rdd = lyrics_df.rdd.repartition(4)
+lyrics_rdd_raw = lyrics_df.limit(SONGS_LIMIT).rdd.repartition(PARTITIONS)
+# reorder structture from |Artist|Lyrics|Songname| to |Artist|Songname|Lyrics|
+lyrics_rdd = lyrics_rdd_raw.map(lambda x: (x[0], x[2], x[1])).cache()
 
-# reorder structture from |Artist|Lyrics|Songname| to |Interpret|Songname|processed Lyrics-words|
-song_words_rdd = lyrics_rdd.map(lambda x: (x[0], x[2], preproc_text(x[1])))
+# preprocess the lyrics
+song_words_rdd = lyrics_rdd.map(lambda x: (x[0], x[1], preproc_text(x[2]))).cache()
 print("song_words_rdd with {} entries and {} partitions".format(song_words_rdd.count(), song_words_rdd.getNumPartitions()))
-print(song_words_rdd.take(10))
+# print(song_words_rdd.take(10))
 t_preproc = datetime.datetime.now()
 print("preprocesstime:", str(t_preproc - t_loaded))
-print("")
+print("...\n")
 
 print("----List most common words by song-------------")
 for song in song_words_rdd.map(lambda x: (x[0], x[1], sort_word_count_dict_to_list(x[2]))).take(20):
     # print Artist|SongName|Number of unique words in Song|3 most used words|
     print(song[0] + " | " + song[1] + " | " + str(len(song[2])) + " | " + str(song[2][0:3]))
+print("...")
 print("")
-
 
 print("----List most common words by artist-------------")
 # create new rrd with structure |Interpret|word count dict| then reduce by key (Interpret), combining the word count dictionaries
-artist_words_rdd = song_words_rdd.map(lambda x: (x[0], x[2])).reduceByKey(lambda wcd1, wcd2: combine_word_count_dicts(wcd1, wcd2))
+artist_words_rdd = song_words_rdd.map(lambda x: (x[0], x[2])).reduceByKey(lambda wcd1, wcd2: combine_word_count_dicts(wcd1, wcd2)).cache()
 # print("artist_words_rdd partitions", artist_words_rdd.getNumPartitions())
 for artist in artist_words_rdd.map(lambda x: (x[0], sort_word_count_dict_to_list(x[1]))).take(10):
     print(artist[0] + " | " + str(artist[1][0:3]))
-print("")
+print("...\n")
 
 
 print("----List most common words in all songs-------------")
 words_count_dict = song_words_rdd.map(lambda x: x[2]).reduce(lambda wcd1, wcd2: combine_word_count_dicts(wcd1, wcd2))
-print(sort_word_count_dict_to_list(words_count_dict)[0:6])
+print(sort_word_count_dict_to_list(words_count_dict)[0:10])
 print("")
+
+
+print("----List artists using the most unique words-------------")
+# reuse artist_words_rdd and sort by length of the dictionary which is the number of unique words
+artist_words_count_sorted_rdd = artist_words_rdd.map(lambda x: (x[0], len(x[1]))).sortBy(lambda x: x[1], ascending=False).cache()
+
+for artist_word_count in artist_words_count_sorted_rdd.take(10):
+    print(artist_word_count[0] + " | " + str(artist_word_count[1]))
+print("...\n")
+
+
+print("----List artists with the longest texts by average-------------")
+# to calculate the average we first create a tuple with length of the lyrics and the literal "1" for each song: (len(lyrics) , 1).
+# Then we reduce and sum the tuple resolving the total length and the number of songs of the artist: (len(all lyrics, num lyrics)).
+# Then we can map the rdd again and divide the total length by the number resulting in the average.
+artist_lyrics_len_avg_rdd = lyrics_rdd.map(lambda x: (x[0], (len(x[2]), 1)))\
+    .reduceByKey(lambda a, b: (a[0] + b[0], a[1] + b[1]))\
+    .map(lambda x: (x[0], x[1][0] / x[1][1]))\
+    .sortBy(lambda x: x[1], ascending=False)
+
+for artist_lyrics_len in artist_lyrics_len_avg_rdd.take(10):
+    print(artist_lyrics_len[0] + " | " + str(artist_lyrics_len[1]))
+print("...\n")
+
 
 t_end = datetime.datetime.now()
 print("runtime:", str(t_end - t_preproc))
