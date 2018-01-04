@@ -113,8 +113,15 @@ print("loadtime:", str(t_loaded - t0))
 # Get SONGS_LIMIT Rows/Songs out of lyrics_df
 # repartition() is needed for performance
 lyrics_rdd_raw = lyrics_df.limit(SONGS_LIMIT).rdd.repartition(PARTITIONS)
+
+# debug if there are bad bad lyrics entries
+# lyrics_bad_rdd = lyrics_rdd_raw.filter(lambda x: not x[0] or not x[1] or not x[2])
+# print("bad entries in lyrics:", lyrics_bad_rdd.count(), lyrics_bad_rdd.take(3))
+# exit(0)
+
 # reorder structture from |Artist|Lyrics|Songname| to |Artist|Songname|Lyrics|
-lyrics_rdd = lyrics_rdd_raw.map(lambda x: (x[0], x[2], x[1])).cache()
+# and filter out elements with empty values
+lyrics_rdd = lyrics_rdd_raw.map(lambda x: (x[0], x[2], x[1])).filter(lambda x: x[0] and x[1] and x[2]).cache()
 
 # preprocess the lyrics
 song_words_rdd = lyrics_rdd.map(lambda x: (x[0], x[1], preproc_text(x[2]))).cache()
@@ -130,6 +137,7 @@ for song in song_words_rdd.map(lambda x: (x[0], x[1], sort_word_count_dict_to_li
     print(song[0] + " | " + song[1] + " | " + str(len(song[2])) + " | " + str(song[2][0:3]))
 print("...")
 print("")
+
 
 print("----List most common words by artist-------------")
 # create new rrd with structure |Interpret|word count dict| then reduce by key (Interpret), combining the word count dictionaries
