@@ -1,0 +1,72 @@
+loaded 516174 lyrics into data frame
+('loadtime:', '0:00:10.393463')
+song_words_rdd with 516166 entries and 20 partitions
+('preprocesstime:', '0:00:48.002116')
+...
+
+----List most common words by song-------------
+Eliza Doolittle | Mr. Medicine | 59 | [(u'medicine', 22), (u'mr', 22), (u'feel', 5)]
+Eliza Doolittle | Nobody | 49 | [(u'whats', 7), (u'bein', 7), (u'wrong', 7)]
+Eliza Doolittle | Police Car | 52 | [(u'cool', 12), (u'forget', 8), (u'arrested', 4)]
+Eliza Doolittle | Rollerblades | 49 | [(u'know', 9), (u'want', 6), (u'singing', 5)]
+Eliza Doolittle | A Smokey Room | 26 | [(u'original', 13), (u'yea', 12), (u'thats', 12)]
+Eliza Doolittle | So High | 32 | [(u'need', 8), (u'know', 5), (u'feeling', 5)]
+Eliza Doolittle | Euston Road | 63 | [(u'life', 5), (u'caught', 5), (u'getting', 5)]
+Eliza Doolittle | Back Packing | 48 | [(u'back', 20), (u'packing', 20), (u'real', 10)]
+Eliza Doolittle | Big When I Was Little | 83 | [(u'big', 18), (u'saw', 6), (u'know', 6)]
+Eliza Doolittle | Checkmate | 52 | [(u'army', 8), (u'window', 6), (u'took', 6)]
+Ella Fitzgerald | Learnin the Blues | 83 | [(u'blues', 13), (u'yes', 9), (u'ha', 8)]
+Ella Fitzgerald | Bugle Call Rag | 29 | [(u'bugle', 4), (u'call', 4), (u'rag', 2)]
+Ella Fitzgerald | School Days | 87 | [(u'rock', 5), (u'round', 4), (u'roll', 3)]
+Ella Fitzgerald | Don'cha Go 'Way Mad | 38 | [(u'baby', 16), (u'mad', 7), (u'doncha', 5)]
+Ella Fitzgerald | Sentimental Journey | 38 | [(u'sentimental', 5), (u'journey', 5), (u'gonna', 3)]
+Ella Fitzgerald | Stone Cold Dead in the Market (He Had It Coming) | 50 | [(u'dead', 18), (u'cold', 18), (u'market', 18)]
+Ella Fitzgerald | That's the Way It Is | 19 | [(u'thats', 10), (u'shouldnt', 6), (u'know', 4)]
+Ella Fitzgerald | Would You Like to Take a Walk? | 57 | [(u'mmm', 18), (u'goodll', 6), (u'sumpn', 6)]
+Ella Fitzgerald | You Won't Be Satisfied (Until You Break My Heart) | 30 | [(u'heart', 5), (u'satisfied', 4), (u'toss', 2)]
+Ella Fitzgerald | Autumn in New York | 57 | [(u'autumn', 13), (u'york', 13), (u'live', 3)]
+...
+
+----List most common words by artist-------------
+Fred Elizalde | [(u'tiger', 20), (u'wheres', 12), (u'happy', 10)]
+Floorfilla | [(u'back', 13), (u'school', 10), (u'reality', 6)]
+Maria Kostelas | [(u'maria', 9), (u'tony', 7), (u'make', 5)]
+Geraldine Hunt | [(u'feeling', 45), (u'fake', 11), (u'love', 7)]
+Herb Alpert | [(u'love', 110), (u'day', 62), (u'accustomed', 62)]
+Peter Sarstedt | [(u'look', 5), (u'inside', 5), (u'yes', 4)]
+Human Nature | [(u'baby', 281), (u'love', 232), (u'know', 132)]
+Larry Arlotta | [(u'greater', 7), (u'love', 7), (u'think', 4)]
+Meliah Rage | [(u'lost', 28), (u'life', 28), (u'dead', 14)]
+Arnulfo | [(u'el', 8), (u'hab', 6), (u'mi', 6)]
+...
+
+----List most common words in all songs-------------
+[(u'love', 733518), (u'know', 586940), (u'time', 337907), (u'baby', 318476), (u'come', 302878), (u'want', 301773), (u'yeah', 274668), (u'say', 263434), (u'let', 263383), (u'make', 249128)]
+
+----List artists using the most unique words-------------
+Rohff | 11798
+Eminem | 11033
+Tech N9ne | 9983
+Booba | 9948
+Lil Wayne | 9442
+E-40 | 9310
+IAM | 9134
+Bushido | 9110
+Snoop Dogg | 9106
+Ghostface Killah | 9034
+...
+
+----List artists with the longest texts by average-------------
+Bentzon Brotherhood | 14516
+The Congress of Wonders | 13677
+Too Much Trouble | 9112
+Martin Luther King, Jr. | 8780
+Professor X | 8435
+Friend Within | 7029
+H.S.E. | 6971
+King Lou | 6870
+Deepspace 5 | 6807
+Young Droop | 6764
+...
+
+('runtime:', '0:22:16.601392')
