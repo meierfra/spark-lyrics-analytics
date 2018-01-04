@@ -4,6 +4,6 @@ before using spark-submit.
 
 export PYTHONIOENCODING=utf8
 
-
 ----------------
--
+- to generate the results run:
+spark-submit analyze_lyrics.py > results.txt
