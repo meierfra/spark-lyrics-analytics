@@ -13,9 +13,10 @@ STOPWORD_FILE = PATH + "/" + "stopwords.txt"
 
 # Lyrics dataset from kaggle
 # https://www.kaggle.com/artimous/every-song-you-have-heard-almost
-LYRICS_CSV = PATH + "/" + "Lyrics.small.csv"
-# LYRICS_CSV = PATH + "/" + "Lyrics1.csv"
-# LYRICS_CSV = PATH + "/" + "Lyrics2.csv"
+# LYRICS_CSV = PATH + "/" + "Lyrics.small.csv"
+LYRICS_CSV = PATH + "/" + "Lyrics1.csv"
+LYRICS_CSV2 = None
+LYRICS_CSV2 = PATH + "/" + "Lyrics2.csv"
 # LYRICS_CSV = PATH + "/" + "Lyrics_all.csv"
 SONGS_LIMIT = 10000
 # SONGS_LIMIT = 10000000
@@ -98,6 +99,21 @@ lyrics_df = sqlContext.read.format("com.databricks.spark.csv")\
     .option("escape", '"')\
     .option("inferSchema", "true")\
     .load(LYRICS_CSV)
+
+if (LYRICS_CSV2):
+    lyrics_df2 = sqlContext.read.format("com.databricks.spark.csv")\
+        .option("header", "true")\
+        .option("multiLine", "true")\
+        .option("escape", '"')\
+        .option("inferSchema", "true")\
+        .load(LYRICS_CSV2)
+    lyrics_df = lyrics_df.union(lyrics_df2)
+
+
+# Remove duplicates (if any)
+lyrics_df = lyrics_df.dropDuplicates()
+
+
 print("loaded {} lyrics into data frame".format(lyrics_df.count()))
 t_loaded = datetime.datetime.now()
 print("loadtime:", str(t_loaded - t0))
@@ -109,6 +125,7 @@ print("loadtime:", str(t_loaded - t0))
 
 # print(lyrics_df.count())
 # lyrics_df.show()
+
 
 # Get SONGS_LIMIT Rows/Songs out of lyrics_df
 # repartition() is needed for performance
@@ -141,15 +158,16 @@ print("")
 
 print("----List most common words by artist-------------")
 # create new rrd with structure |Interpret|word count dict| then reduce by key (Interpret), combining the word count dictionaries
-artist_words_rdd = song_words_rdd.map(lambda x: (x[0], x[2])).reduceByKey(lambda wcd1, wcd2: combine_word_count_dicts(wcd1, wcd2)).cache()
-# print("artist_words_rdd partitions", artist_words_rdd.getNumPartitions())
+artist_words_rdd = song_words_rdd.map(lambda x: (x[0], x[2]))\
+    .reduceByKey(lambda wcd1, wcd2: combine_word_count_dicts(wcd1, wcd2)).cache()
 for artist in artist_words_rdd.map(lambda x: (x[0], sort_word_count_dict_to_list(x[1]))).take(10):
     print(artist[0] + " | " + str(artist[1][0:3]))
 print("...\n")
 
 
 print("----List most common words in all songs-------------")
-words_count_dict = song_words_rdd.map(lambda x: x[2]).reduce(lambda wcd1, wcd2: combine_word_count_dicts(wcd1, wcd2))
+words_count_dict = song_words_rdd.map(lambda x: x[2])\
+    .reduce(lambda wcd1, wcd2: combine_word_count_dicts(wcd1, wcd2))
 print(sort_word_count_dict_to_list(words_count_dict)[0:10])
 print("")
 
