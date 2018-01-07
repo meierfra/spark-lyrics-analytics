@@ -1,0 +1,20 @@
+- copy files to master node
+scp -i ~/id_rsa.aws.pem analyze_lyrics.py Lyrics1.csv Lyrics2.csv stopwords.txt hadoop@[MASTER NODE IP]:~
+
+----------------
+- copy files to hdfs
+hadoop fs -copyFromLocal Lyrics1.csv Lyrics2.csv stopwords.txt ./
+hadoop fs -ls
+
+-----------------
+- on Amazon EMR cluster I had to set the env variable PYTHONIOENCODING to utf8
+before using spark-submit.
+
+export PYTHONIOENCODING=utf8
+
+----------------
+- to generate the results run:
+spark-submit analyze_lyrics.py > results.txt
+or
+spark-submit analyze_lyrics.py 2> err.txt | tee results.txt
+

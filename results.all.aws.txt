@@ -1,0 +1,72 @@
+loaded 507563 lyrics into data frame
+('loadtime:', '0:00:27.038933')
+song_words_rdd with 507555 entries and 20 partitions
+('preprocesstime:', '0:01:00.810871')
+...
+
+----List most common words by song-------------
+Madrigal | Moulded Pain | 37 | [(u'open', 4), (u'tears', 3), (u'truth', 3)]
+Magazine | Shot by Both Sides [Alternate Recording] | 43 | [(u'wormed', 14), (u'crowd', 12), (u'heart', 6)]
+Magic Slim | The Sky Is Crying | 26 | [(u'baby', 5), (u'street', 4), (u'real', 4)]
+Feeder | Sweet16 | 43 | [(u'death', 9), (u'sweet', 4), (u'save', 4)]
+Fergie | True | 69 | [(u'hey', 35), (u'true', 34), (u'huh', 24)]
+The Dears | Postcard from Purgatory | 7 | [(u'empty', 4), (u'wasted', 2), (u'heads', 1)]
+The Decemberists | Clementine | 43 | [(u'sweet', 5), (u'play', 2), (u'home', 2)]
+The Decemberists | Of Angels and Angles | 31 | [(u'theres', 8), (u'caught', 2), (u'moon', 2)]
+The Decemberists | Burying Davy | 27 | [(u'burying', 10), (u'davy', 10), (u'bring', 4)]
+The Del Vikings | I Only Have Eyes for You | 24 | [(u'eyes', 3), (u'love', 2), (u'know', 2)]
+The Wonder Stuff | Gimme Some Truth | 50 | [(u'truth', 22), (u'give', 12), (u'want', 10)]
+The Wonder Stuff | Sleep Alone | 23 | [(u'easy', 4), (u'telephone', 2), (u'home', 2)]
+Shannon Noll | Drive | 34 | [(u'ive', 6), (u'lets', 6), (u'car', 4)]
+Shaquille O'Neal | Make This a Night to Remember | 181 | [(u'ready', 13), (u'baby', 11), (u'peter', 6)]
+Sharon Redd | In the Name of Love | 20 | [(u'love', 33), (u'back', 4), (u'take', 3)]
+Shawn Mullins | Pandora | 77 | [(u'pandoras', 3), (u'telling', 2), (u'hard', 2)]
+Ani DiFranco | Blood in the Boardroom | 91 | [(u'sitting', 3), (u'room', 3), (u'say', 3)]
+Radney Foster | Fools That Dream | 49 | [(u'dream', 10), (u'fools', 9), (u'love', 4)]
+Raekwon | The Wild (Intro) | 46 | [(u'yeah', 3), (u'wild', 3), (u'shit', 2)]
+Rage | R.I.P. | 19 | [(u'say', 2), (u'world', 1), (u'belong', 1)]
+...
+
+----List most common words by artist-------------
+Everette Harp | [(u'dah', 80), (u'love', 55), (u'da', 27)]
+Juan Cirerol | [(u'en', 8), (u'mi', 5), (u'te', 5)]
+East River Pipe | [(u'life', 16), (u'feel', 13), (u'fine', 6)]
+MN8 | [(u'take', 6), (u'moon', 4), (u'tonight', 3)]
+Luzbel | [(u'nos', 5), (u'nuestra', 4), (u'es', 4)]
+Bruce Forman | [(u'say', 17), (u'love', 16), (u'sweet', 10)]
+Peter T. Noonan | [(u'snow', 9), (u'let', 9), (u'fire', 2)]
+Idle Sons | [(u'back', 16), (u'tell', 12), (u'days', 10)]
+Gallant | [(u'low', 68), (u'long', 31), (u'counting', 22)]
+Randy Sandke | [(u'love', 28), (u'runnin', 12), (u'wild', 12)]
+...
+
+----List most common words in all songs-------------
+[(u'love', 721855), (u'know', 577236), (u'time', 332735), (u'baby', 313024), (u'come', 297749), (u'want', 297338), (u'yeah', 270368), (u'say', 259423), (u'let', 259118), (u'make', 245156)]
+
+----List artists using the most unique words-------------
+Rohff | 11798
+Eminem | 11033
+Tech N9ne | 9983
+Booba | 9948
+Lil Wayne | 9442
+E-40 | 9310
+IAM | 9134
+Bushido | 9110
+Snoop Dogg | 9106
+Ghostface Killah | 9034
+...
+
+----List artists with the longest texts by average-------------
+Bentzon Brotherhood | 14516
+The Congress of Wonders | 13677
+Too Much Trouble | 9112
+Martin Luther King, Jr. | 8780
+Professor X | 8435
+Friend Within | 7029
+H.S.E. | 6971
+King Lou | 6870
+Deepspace 5 | 6807
+Young Droop | 6764
+...
+
+('runtime:', '0:11:40.779919')
