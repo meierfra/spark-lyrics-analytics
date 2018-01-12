@@ -13,6 +13,10 @@ before using spark-submit.
 export PYTHONIOENCODING=utf8
 
 ----------------
+- maybe change the constants in SONGS_LIMIT and PARTITIONS analyze_lirycs.py to fit your needs.
+For example use a low SONG_LIMIT for testing.
+
+----------------
 - to generate the results run:
 spark-submit analyze_lyrics.py > results.txt
 or

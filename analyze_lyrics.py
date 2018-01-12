@@ -17,9 +17,8 @@ STOPWORD_FILE = PATH + "/" + "stopwords.txt"
 LYRICS_CSV = PATH + "/" + "Lyrics1.csv"
 LYRICS_CSV2 = None
 LYRICS_CSV2 = PATH + "/" + "Lyrics2.csv"
-# LYRICS_CSV = PATH + "/" + "Lyrics_all.csv"
-SONGS_LIMIT = 10000
-# SONGS_LIMIT = 10000000
+#SONGS_LIMIT = 10000
+SONGS_LIMIT = 10000000
 PARTITIONS = 20
 
 sc = pyspark.SparkContext(appName="READ_DATA_TEST")
